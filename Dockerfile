@@ -1,19 +1,24 @@
-FROM node:20-alpine
+# Use official OmniRoute image directly (no need to build from scratch)
+FROM diegosouzapw/omniroute:latest
 
-WORKDIR /app
+# Data directory for SQLite DB persistence
+ENV DATA_DIR=/app/data
 
-RUN npm install -g 9router --prefer-offline
-
-RUN mkdir -p /root/.9router
-
-# Required env vars for headless/server deployment
+# Single port mode for Render (dashboard + API on same port)
 ENV PORT=8080
-ENV NODE_ENV=production
-ENV JWT_SECRET=changeme_random_secret
-ENV INITIAL_PASSWORD=God@111983
-ENV DATA_DIR=/root/.9router
 
+ENV NODE_ENV=production
+
+# Security secrets — CHANGE THESE in Render's environment tab, not here!
+ENV JWT_SECRET=changeme_replace_in_render_dashboard
+ENV INITIAL_PASSWORD=God@111983
+ENV STORAGE_ENCRYPTION_KEY=changeme_replace_in_render_dashboard
+
+# Skip auto-open browser (headless cloud mode)
+ENV NO_OPEN=true
+
+# Expose port
 EXPOSE 8080
 
-# Add --skip-update to prevent update prompts
-CMD ["9router", "--no-browser", "--port", "8080", "--skip-update"]
+# Data volume for persistence
+VOLUME ["/app/data"]
